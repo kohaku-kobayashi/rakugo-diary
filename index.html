@@ -1,0 +1,1776 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>鈴本演芸場 電脳高座 〜 日々の日記落語化劇場 〜</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts for Edo/Yose Atmosphere -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kiwi+Maru:wght@400;500&family=Shippori+Mincho:wght@500;700;900&family=Yuji+Boku&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --edo-black: #1a1614;
+      --edo-red: #b83b26;
+      --edo-gold: #cfa853;
+      --edo-wood: #4a2f1b;
+      --edo-curtain-kaki: #8b3a2b;
+      --edo-curtain-black: #111111;
+      --edo-curtain-moegi: #264e36;
+    }
+
+    body {
+      font-family: 'Shippori Mincho', serif;
+      background-color: #0d0c0b;
+      color: #ede5d8;
+      overflow-x: hidden;
+    }
+
+    .font-yose {
+      font-family: 'Yuji Boku', 'Kiwi Maru', serif;
+    }
+
+    .font-mincho {
+      font-family: 'Shippori Mincho', serif;
+    }
+
+    /* 定式幕グラデーション/ストライプ */
+    .joshikimaku {
+      background: repeating-linear-gradient(
+        to right,
+        #111111 0px,
+        #111111 50px,
+        #8a3324 50px,
+        #8a3324 100px,
+        #284e3a 100px,
+        #284e3a 150px
+      );
+    }
+
+    /* 提灯ゆらゆら */
+    @keyframes lanternSway {
+      0%, 100% { transform: rotate(-2deg); }
+      50% { transform: rotate(2deg); }
+    }
+    .lantern-sway {
+      animation: lanternSway 4s ease-in-out infinite;
+      transform-origin: top center;
+    }
+
+    /* 笑い・拍手の吹き出しアニメーション */
+    @keyframes laughFloat {
+      0% { opacity: 0; transform: translateY(15px) scale(0.8); }
+      20% { opacity: 1; transform: translateY(0) scale(1.1); }
+      80% { opacity: 1; transform: translateY(-20px) scale(1); }
+      100% { opacity: 0; transform: translateY(-40px) scale(0.9); }
+    }
+    .laugh-bubble {
+      animation: laughFloat 2.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    }
+
+    /* めくり台アニメーション */
+    .mekuri-flip {
+      animation: mekuriFlip 0.8s ease-in-out;
+      transform-origin: top center;
+    }
+    @keyframes mekuriFlip {
+      0% { transform: rotateX(0deg); }
+      50% { transform: rotateX(-90deg); opacity: 0.5; }
+      100% { transform: rotateX(0deg); opacity: 1; }
+    }
+
+    /* 和紙テクスチャ背景風 */
+    .washi-pattern {
+      background-color: #f7f3e9;
+      background-image: radial-gradient(#d6cfc2 1px, transparent 1px);
+      background-size: 16px 16px;
+    }
+
+    /* カスタムスクロールバー */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #1c1815;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #5a493a;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-amber-800 selection:text-amber-100">
+
+  <!-- ヘッダー装飾：定式幕と寄席行灯 -->
+  <header class="relative z-30 bg-[#161210] border-b border-[#36271c] shadow-2xl">
+    <div class="h-2.5 joshikimaku w-full"></div>
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <!-- 鈴の家紋マーク -->
+        <div class="w-10 h-10 rounded-full bg-amber-700/30 border border-amber-600/50 flex items-center justify-center text-amber-300 font-yose text-xl shadow-inner">
+          鈴
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="text-xs px-2 py-0.5 rounded bg-red-900/60 text-red-200 border border-red-700 font-yose">上野・仲町通り</span>
+            <h1 class="text-xl md:text-2xl font-bold tracking-widest text-[#f5ebd9] font-yose">鈴本演芸場 <span class="text-amber-400 text-lg md:text-xl font-mincho">電脳高座</span></h1>
+          </div>
+          <p class="text-xs text-[#a39482] tracking-wider">今日の日記を、春風亭一之輔仕込みの「1分爆笑落語」へ仕立て直します</p>
+        </div>
+      </div>
+
+      <!-- 右側：ナビゲーション・音響トグル・APIキー設定 -->
+      <div class="flex items-center space-x-2">
+        <button id="audioToggleBtn" class="px-3 py-1.5 rounded-lg border border-amber-700/60 bg-[#241a14] hover:bg-[#33251c] text-amber-200 text-xs flex items-center space-x-1.5 transition shadow">
+          <i data-lucide="volume-2" class="w-4 h-4 text-amber-400"></i>
+          <span id="audioStatusText">寄席囃子: 入</span>
+        </button>
+        <button id="configBtn" title="設定" class="p-2 rounded-lg border border-stone-700 bg-stone-900/80 hover:bg-stone-800 text-stone-300 transition">
+          <i data-lucide="settings" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- メインコンテンツ -->
+  <main class="flex-1 flex flex-col relative overflow-hidden">
+    
+    <!-- タブ切り替え：高座 (演芸場ビュー) vs 日記台帳 (入力・編集) -->
+    <div class="bg-[#120f0d] border-b border-[#281c15] py-2 px-4 z-20">
+      <div class="max-w-4xl mx-auto flex items-center justify-between gap-3">
+        <div class="flex items-center space-x-2">
+          <button id="tabKozaBtn" class="py-1.5 px-4 rounded-md text-sm font-yose tracking-wider flex items-center justify-center space-x-2 transition border bg-amber-900/40 border-amber-500 text-amber-200 shadow">
+            <i data-lucide="theater" class="w-4 h-4"></i>
+            <span>寄席高座（客席）</span>
+          </button>
+          <button id="tabInputBtn" class="py-1.5 px-4 rounded-md text-sm font-yose tracking-wider flex items-center justify-center space-x-2 transition border border-stone-800 bg-stone-900/50 text-stone-400 hover:text-stone-200">
+            <i data-lucide="book-open" class="w-4 h-4"></i>
+            <span>日記帳・ネタ帳</span>
+          </button>
+        </div>
+        <!-- 「今日は何がありましたか？」直通ボタン -->
+        <button id="askTodayPromptBtn" class="py-1.5 px-3 md:px-4 rounded-lg bg-gradient-to-r from-red-800 to-amber-700 hover:from-red-700 hover:to-amber-600 text-amber-100 font-yose text-xs md:text-sm flex items-center space-x-1.5 shadow-md border border-amber-500/50 transition transform active:scale-95">
+          <i data-lucide="message-circle-question" class="w-4 h-4 text-yellow-300"></i>
+          <span>「今日は何がありましたか？」と話す</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 画面1: 寄席高座ビュー（鈴本演芸場の客席から見ているイメージ） -->
+    <section id="kozaView" class="flex-1 flex flex-col justify-between relative bg-[#090807] overflow-hidden select-none">
+      
+      <!-- 舞台上部の定式幕と梁（はり） -->
+      <div class="absolute top-0 left-0 right-0 z-10 pointer-events-none">
+        <div class="h-4 joshikimaku opacity-90 border-b border-amber-950"></div>
+        <div class="h-6 bg-gradient-to-b from-[#1f1510] to-transparent flex justify-around items-center px-8"></div>
+      </div>
+
+      <!-- 提灯（上手・下手） -->
+      <div class="absolute top-6 left-4 md:left-12 z-20 lantern-sway flex flex-col items-center">
+        <div class="w-1 h-6 bg-amber-900/80"></div>
+        <div class="w-11 md:w-14 py-4 rounded-2xl bg-[#ffeed6] text-[#8a1c14] border-2 border-[#801811] shadow-[0_0_20px_rgba(255,200,100,0.35)] flex flex-col items-center justify-center font-yose font-bold leading-tight">
+          <span class="text-xs md:text-sm text-stone-800">上野</span>
+          <span class="text-sm md:text-base tracking-tighter">鈴本</span>
+        </div>
+        <div class="w-2.5 h-1.5 bg-stone-800 rounded-b"></div>
+      </div>
+
+      <div class="absolute top-6 right-4 md:right-12 z-20 lantern-sway flex flex-col items-center" style="animation-delay: -2s;">
+        <div class="w-1 h-6 bg-amber-900/80"></div>
+        <div class="w-11 md:w-14 py-4 rounded-2xl bg-[#ffeed6] text-[#8a1c14] border-2 border-[#801811] shadow-[0_0_20px_rgba(255,200,100,0.35)] flex flex-col items-center justify-center font-yose font-bold leading-tight">
+          <span class="text-xs md:text-sm text-stone-800">當る</span>
+          <span class="text-sm md:text-base tracking-tighter">大入</span>
+        </div>
+        <div class="w-2.5 h-1.5 bg-stone-800 rounded-b"></div>
+      </div>
+
+      <!-- 舞台中央（スポットライト・鏡板・高座・めくり） -->
+      <div class="relative w-full max-w-5xl mx-auto flex-1 flex flex-col items-center justify-center pt-8 pb-4 px-2">
+
+        <!-- 舞台の鏡板（老松の背景） -->
+        <div class="relative w-full max-w-3xl aspect-[16/9] md:aspect-[21/10] rounded-xl overflow-hidden border-4 border-[#3d2417] shadow-[0_0_50px_rgba(0,0,0,0.9)] bg-[#2e1d13] flex flex-col justify-end">
+          
+          <!-- 松の羽目板背景グラフィック (SVG) -->
+          <div class="absolute inset-0 opacity-80 pointer-events-none">
+            <svg viewBox="0 0 800 450" class="w-full h-full object-cover">
+              <defs>
+                <linearGradient id="woodGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#472d1c"/>
+                  <stop offset="50%" stop-color="#362114"/>
+                  <stop offset="100%" stop-color="#24140b"/>
+                </linearGradient>
+                <radialGradient id="spotlight" cx="50%" cy="55%" r="45%">
+                  <stop offset="0%" stop-color="#fff8db" stop-opacity="0.3"/>
+                  <stop offset="60%" stop-color="#ffa500" stop-opacity="0.08"/>
+                  <stop offset="100%" stop-color="#000000" stop-opacity="0.6"/>
+                </radialGradient>
+              </defs>
+              <rect width="800" height="450" fill="url(#woodGrad)" />
+              <!-- 板目のスリット -->
+              <g stroke="#1b0f07" stroke-width="2" opacity="0.4">
+                <line x1="100" y1="0" x2="100" y2="450"/>
+                <line x1="200" y1="0" x2="200" y2="450"/>
+                <line x1="300" y1="0" x2="300" y2="450"/>
+                <line x1="400" y1="0" x2="400" y2="450"/>
+                <line x1="500" y1="0" x2="500" y2="450"/>
+                <line x1="600" y1="0" x2="600" y2="450"/>
+                <line x1="700" y1="0" x2="700" y2="450"/>
+              </g>
+              <!-- 鏡板の老松イラスト -->
+              <path d="M 400 320 C 370 260 330 220 310 170 C 300 145 320 110 350 95 C 410 70 480 80 520 130 C 540 155 570 170 610 180" fill="none" stroke="#22160d" stroke-width="28" stroke-linecap="round"/>
+              <path d="M 330 190 C 270 180 230 195 190 220" fill="none" stroke="#1d120a" stroke-width="16" stroke-linecap="round"/>
+              <!-- 松葉の塊（緑） -->
+              <ellipse cx="340" cy="110" rx="60" ry="32" fill="#1b3623" opacity="0.85"/>
+              <ellipse cx="450" cy="95" rx="75" ry="38" fill="#23462d" opacity="0.9"/>
+              <ellipse cx="530" cy="140" rx="65" ry="34" fill="#1a3421" opacity="0.85"/>
+              <ellipse cx="210" cy="210" rx="50" ry="26" fill="#1e3a26" opacity="0.8"/>
+              <ellipse cx="610" cy="190" rx="45" ry="24" fill="#24452d" opacity="0.75"/>
+              <!-- スポットライトオーバーレイ -->
+              <rect width="800" height="450" fill="url(#spotlight)" />
+            </svg>
+          </div>
+
+          <!-- めくり台（下手側：画面左） -->
+          <div class="absolute left-3 md:left-8 bottom-12 md:bottom-16 z-20 flex flex-col items-center">
+            <!-- 演者・演目名の手書き風めくり -->
+            <div id="mekuriBox" class="w-12 md:w-16 bg-[#faf5e8] text-stone-900 border border-stone-400 shadow-xl py-3 px-1 rounded-sm flex flex-col items-center font-yose select-none transition-transform">
+              <span id="mekuriTitle" class="text-[11px] md:text-xs text-amber-900 font-bold border-b border-stone-300 pb-1 mb-1 tracking-tighter text-center leading-tight">一分<br>落語</span>
+              <span id="mekuriName" class="text-xs md:text-sm font-black tracking-widest writing-vertical text-stone-900 text-center leading-relaxed">春風亭<br>壱之介</span>
+            </div>
+            <!-- めくり台の木製スタンド -->
+            <div class="w-1.5 h-10 md:h-16 bg-[#3a2012]"></div>
+            <div class="w-8 md:w-12 h-2 bg-[#25130a] rounded-t"></div>
+          </div>
+
+          <!-- 高座（落語家＆座布団） -->
+          <div class="relative z-10 w-full flex flex-col items-center justify-end pb-3">
+            
+            <!-- 笑いエフェクト・大向こうの掛け声ポップアップコンテナ -->
+            <div id="laughReactionContainer" class="absolute -top-12 inset-x-0 h-28 pointer-events-none flex justify-center items-center overflow-visible"></div>
+
+            <!-- 噺家からの呼びかけバルーン（今日は何がありましたか？） -->
+            <div id="askTodaySpeechBubble" class="absolute -top-6 md:-top-8 z-30 bg-[#fbf6ea] text-stone-900 border-2 border-amber-800 rounded-2xl px-4 py-2 shadow-2xl flex items-center space-x-2 cursor-pointer hover:bg-amber-100 transition transform hover:scale-105 animate-bounce">
+              <span class="text-xs md:text-sm font-yose font-bold text-red-900">壱之介：</span>
+              <span class="text-xs md:text-sm font-yose tracking-wide">「客席の旦那、<strong class="text-red-800 underline decoration-amber-600">今日は何がありました？</strong> 1分で笑わせますよ」</span>
+              <span class="text-[11px] px-2 py-0.5 rounded bg-amber-800 text-amber-50 font-sans">答える</span>
+            </div>
+
+            <!-- 落語家 SVG アニメーションキャラクター -->
+            <div id="rakugokaWrapper" class="relative w-48 h-48 md:w-64 md:h-64 transition-transform duration-300 ease-out flex items-center justify-center">
+              <svg id="rakugokaSvg" viewBox="0 0 300 300" class="w-full h-full filter drop-shadow-[0_10px_15px_rgba(0,0,0,0.6)]">
+                <defs>
+                  <!-- 着物のグラデーション -->
+                  <linearGradient id="kimonoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#2c3e50"/>
+                    <stop offset="50%" stop-color="#1e2b37"/>
+                    <stop offset="100%" stop-color="#131d26"/>
+                  </linearGradient>
+                  <!-- 羽織のグラデーション（藍色または渋い紫） -->
+                  <linearGradient id="haoriGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#553c69"/>
+                    <stop offset="100%" stop-color="#352243"/>
+                  </linearGradient>
+                  <!-- 座布団の紫金 -->
+                  <linearGradient id="zabutonGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#8c1d32"/>
+                    <stop offset="60%" stop-color="#671021"/>
+                    <stop offset="100%" stop-color="#3e0712"/>
+                  </linearGradient>
+                </defs>
+
+                <!-- 落語家の体・羽織・着物 -->
+                <g id="bodyGroup">
+                  <!-- 着物（下層） -->
+                  <path d="M 80 240 L 150 145 L 220 240 Z" fill="url(#kimonoGrad)"/>
+                  <path d="M 140 145 L 150 190 L 160 145" stroke="#f1e7d0" stroke-width="4" fill="none"/>
+
+                  <!-- 羽織（肩から膝へ） -->
+                  <path d="M 70 245 C 65 190 95 140 125 130 C 135 127 165 127 175 130 C 205 140 235 190 230 245 C 200 255 100 255 70 245 Z" fill="url(#haoriGrad)" stroke="#22132e" stroke-width="2"/>
+                  <!-- 羽織紐（白房） -->
+                  <circle cx="150" cy="180" r="4" fill="#faf5e8"/>
+                  <path d="M 148 182 L 144 200 M 152 182 L 156 200" stroke="#faf5e8" stroke-width="3" stroke-linecap="round"/>
+
+                  <!-- 手・扇子・手ぬぐい（所作） -->
+                  <!-- 左手（右手と対） -->
+                  <ellipse cx="105" cy="210" rx="14" ry="10" fill="#f7d4b2"/>
+                  <ellipse cx="195" cy="210" rx="14" ry="10" fill="#f7d4b2"/>
+                  
+                  <!-- 扇子 (Sensu) -->
+                  <g id="sensuItem" class="transition-all duration-300 origin-[195px_210px]">
+                    <line x1="195" y1="210" x2="225" y2="175" stroke="#e8dfcb" stroke-width="6" stroke-linecap="round"/>
+                    <line x1="195" y1="210" x2="225" y2="175" stroke="#8a2012" stroke-width="2"/>
+                    <polygon points="215,165 235,170 220,185" fill="#f5ede0"/>
+                  </g>
+                </g>
+
+                <!-- 頭部・首・顔・表情 -->
+                <g id="headGroup" class="transition-transform duration-200 origin-[150px_130px]">
+                  <!-- 首 -->
+                  <rect x="141" y="112" width="18" height="22" fill="#ebbfa0" rx="2"/>
+
+                  <!-- 頭部輪郭 -->
+                  <ellipse cx="150" cy="95" rx="34" ry="38" fill="#fcdbbd"/>
+
+                  <!-- 髪型（坊主・短髪寄席カット） -->
+                  <path d="M 116 95 C 116 60 140 50 150 50 C 160 50 184 60 184 95 C 184 80 175 62 150 62 C 125 62 116 80 116 95 Z" fill="#2b231f"/>
+
+                  <!-- 眉毛 -->
+                  <path id="eyebrowLeft" d="M 132 82 Q 140 78 145 82" stroke="#2b231f" stroke-width="3" stroke-linecap="round" fill="none"/>
+                  <path id="eyebrowRight" d="M 155 82 Q 160 78 168 82" stroke="#2b231f" stroke-width="3" stroke-linecap="round" fill="none"/>
+
+                  <!-- 目（状態によって形状変化：通常、笑顔、驚き） -->
+                  <g id="eyesNormal">
+                    <circle cx="138" cy="92" r="3.2" fill="#1b120c"/>
+                    <circle cx="162" cy="92" r="3.2" fill="#1b120c"/>
+                    <path d="M 134 89 Q 138 87 142 89" stroke="#332218" stroke-width="1.5" fill="none"/>
+                    <path d="M 158 89 Q 162 87 166 89" stroke="#332218" stroke-width="1.5" fill="none"/>
+                  </g>
+                  <g id="eyesSmile" class="hidden">
+                    <path d="M 133 94 Q 138 88 143 94" stroke="#1b120c" stroke-width="3" stroke-linecap="round" fill="none"/>
+                    <path d="M 157 94 Q 162 88 167 94" stroke="#1b120c" stroke-width="3" stroke-linecap="round" fill="none"/>
+                  </g>
+                  <g id="eyesSurprise" class="hidden">
+                    <circle cx="138" cy="92" r="5" stroke="#1b120c" stroke-width="2" fill="#fff"/>
+                    <circle cx="138" cy="92" r="2" fill="#000"/>
+                    <circle cx="162" cy="92" r="5" stroke="#1b120c" stroke-width="2" fill="#fff"/>
+                    <circle cx="162" cy="92" r="2" fill="#000"/>
+                  </g>
+
+                  <!-- 鼻 -->
+                  <path d="M 150 92 Q 153 98 149 101" stroke="#d49b79" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+
+                  <!-- 口（口パク用） -->
+                  <g id="mouthGroup">
+                    <path id="mouthShape" d="M 143 108 Q 150 112 157 108" stroke="#7a2a22" stroke-width="2.8" stroke-linecap="round" fill="none"/>
+                    <ellipse id="mouthOpen" cx="150" cy="111" rx="6" ry="4" fill="#631b14" class="hidden"/>
+                  </g>
+
+                  <!-- 頬の赤み -->
+                  <circle cx="129" cy="100" r="5" fill="#f0907d" opacity="0.35"/>
+                  <circle cx="171" cy="100" r="5" fill="#f0907d" opacity="0.35"/>
+                </g>
+
+                <!-- ふかふかの紫金高座布団 -->
+                <g id="zabuton">
+                  <path d="M 50 250 C 45 235 70 232 150 232 C 230 232 255 235 250 250 C 248 266 220 274 150 274 C 80 274 52 266 50 250 Z" fill="url(#zabutonGrad)" stroke="#4a0914" stroke-width="2"/>
+                  <!-- 四隅の房（ふさ） -->
+                  <circle cx="56" cy="246" r="3" fill="#e6c265"/>
+                  <circle cx="244" cy="246" r="3" fill="#e6c265"/>
+                  <circle cx="70" cy="265" r="3" fill="#e6c265"/>
+                  <circle cx="230" cy="265" r="3" fill="#e6c265"/>
+                  <circle cx="150" cy="254" r="2.5" fill="#e6c265" opacity="0.8"/>
+                </g>
+              </svg>
+            </div>
+
+            <!-- 高座の木製台盤 -->
+            <div class="w-full max-w-md h-5 bg-[#3a1d0d] rounded-t border-t-2 border-[#5c3118] shadow-lg flex justify-between px-6 items-center">
+              <span class="text-[9px] text-[#916b50] font-yose">鈴本</span>
+              <span class="text-[9px] text-[#916b50] font-yose">高座</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 観客席の頭部・肩のシルエット（観客席から見上げている臨場感） -->
+        <div class="w-full max-w-4xl -mt-6 md:-mt-8 z-30 flex justify-between items-end px-4 pointer-events-none opacity-90 select-none">
+          <div class="flex space-x-3 items-end">
+            <!-- 観客1 -->
+            <div class="w-16 h-12 md:w-24 md:h-16 bg-[#080706] rounded-t-full shadow-2xl"></div>
+            <!-- 観客2 -->
+            <div class="w-20 h-16 md:w-28 md:h-20 bg-[#060505] rounded-t-full shadow-2xl hidden sm:block"></div>
+          </div>
+          <div class="text-center pb-2">
+            <!-- クスリと笑うカウンターバッジ -->
+            <div class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-stone-900/90 border border-amber-800/60 shadow-lg backdrop-blur">
+              <span class="text-xs text-amber-400 font-yose">くすり笑い所:</span>
+              <span id="kusuriCounter" class="text-xs font-bold text-amber-200">0 / 3 席</span>
+            </div>
+          </div>
+          <div class="flex space-x-3 items-end">
+            <!-- 観客3 -->
+            <div class="w-20 h-14 md:w-28 md:h-18 bg-[#070605] rounded-t-full shadow-2xl hidden sm:block"></div>
+            <!-- 観客4 -->
+            <div class="w-16 h-12 md:w-24 md:h-16 bg-[#080706] rounded-t-full shadow-2xl"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- セリフ・語り字幕表示板（寄席の雰囲気に合わせた木枠風ディスプレイ） -->
+      <div class="relative z-30 max-w-4xl w-full mx-auto px-4 pb-3">
+        <div class="rounded-xl bg-[#1c1612]/95 border-2 border-[#543b2b] shadow-2xl p-4 backdrop-blur-md flex flex-col md:flex-row gap-4 items-stretch justify-between">
+          
+          <!-- 左側：話し手とセリフ本文 -->
+          <div class="flex-1 min-h-[90px] flex flex-col justify-center">
+            <div class="flex items-center space-x-2 mb-1.5">
+              <span id="speechSpeaker" class="px-2.5 py-0.5 rounded text-xs font-yose bg-amber-900/80 text-amber-200 border border-amber-700">噺家 (マクラ)</span>
+              <span id="speechDirection" class="text-xs text-stone-400 font-mincho">【正面】</span>
+              <span id="kusuriBadge" class="hidden px-2 py-0.5 rounded text-[11px] font-bold bg-red-800 text-yellow-200 border border-yellow-400/50 animate-pulse">クスグリ（笑い所）！</span>
+            </div>
+            <p id="speechText" class="text-base md:text-lg text-[#f7eee1] font-mincho leading-relaxed tracking-wide">
+              「えー、毎度ばかばかしいお笑いを一席。日記のネタ帳を開いて、しばしのお付き合いを願いましょう。」
+            </p>
+          </div>
+
+          <!-- 右側：操作ボタン群 -->
+          <div class="flex flex-row md:flex-col justify-between items-center md:items-end gap-2 border-t md:border-t-0 md:border-l border-stone-800 pt-2 md:pt-0 md:pl-4">
+            <!-- 進行ゲージ -->
+            <div class="text-xs text-stone-400 font-mono w-full text-right flex md:flex-col justify-between items-center gap-1">
+              <span id="progressText">1 / 1 幕</span>
+              <div class="w-24 h-1.5 bg-stone-800 rounded-full overflow-hidden">
+                <div id="progressBar" class="h-full bg-amber-500 w-0 transition-all duration-300"></div>
+              </div>
+            </div>
+
+            <div class="flex items-center space-x-1.5">
+              <button id="prevBtn" title="前のセリフ" class="p-2 rounded bg-stone-800/80 hover:bg-stone-700 text-stone-300 transition">
+                <i data-lucide="chevron-left" class="w-4 h-4"></i>
+              </button>
+              <button id="playPauseBtn" class="px-4 py-2 rounded-lg bg-amber-700 hover:bg-amber-600 text-amber-50 font-yose text-sm flex items-center space-x-1.5 shadow-md transition">
+                <i id="playPauseIcon" data-lucide="play" class="w-4 h-4"></i>
+                <span id="playPauseText">開演</span>
+              </button>
+              <button id="nextBtn" title="次のセリフ" class="p-2 rounded bg-stone-800/80 hover:bg-stone-700 text-stone-300 transition">
+                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+              </button>
+            </div>
+
+            <!-- 再生速度切り替え -->
+            <div class="flex items-center space-x-1">
+              <span class="text-[10px] text-stone-500">話速:</span>
+              <button id="speedBtn" class="text-xs px-2 py-0.5 rounded bg-stone-900 border border-stone-700 text-amber-300 hover:border-amber-500">1.0x</button>
+              <!-- 音声読み上げトグル -->
+              <button id="ttsToggleBtn" title="音声読み上げ" class="p-1 rounded bg-stone-900 border border-stone-700 text-stone-300 hover:text-amber-300">
+                <i id="ttsIcon" data-lucide="mic" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </section>
+
+
+    <!-- 画面2: 日記帳・ネタ帳（入力・生成パネル） -->
+    <section id="inputView" class="hidden flex-1 overflow-y-auto p-4 md:p-8 bg-[#120f0d]">
+      <div class="max-w-3xl mx-auto space-y-6">
+        
+        <!-- 噺家の問いかけバナー -->
+        <div class="bg-gradient-to-r from-red-950/70 via-stone-900 to-[#1b1511] p-4 md:p-5 rounded-2xl border-2 border-amber-700/60 shadow-xl flex items-center gap-4">
+          <div class="w-14 h-14 rounded-full bg-amber-900/60 border-2 border-amber-500/60 flex items-center justify-center text-amber-200 text-2xl font-yose shrink-0 shadow">
+            噺
+          </div>
+          <div class="space-y-1">
+            <div class="flex items-center space-x-2">
+              <span class="px-2 py-0.5 rounded bg-red-900/80 text-yellow-300 text-xs font-yose border border-amber-600">一之輔節・1分高座</span>
+              <h2 class="text-lg md:text-xl font-bold font-yose text-amber-100">「えー、めんどくさいですね。今日は何がありました？」</h2>
+            </div>
+            <p class="text-xs text-stone-300 leading-relaxed font-mincho">
+              理不尽なトラブル、妻への一言の失言、日常のしょうもない後悔……なんでも愚痴ってくだせえ。切れ味抜群の毒気と愛嬌で、1分で腹を抱えて笑える落語にして高座から叩きつけます。
+            </p>
+          </div>
+        </div>
+
+        <!-- プリセット日記ボタン -->
+        <div class="bg-[#1b1511] p-4 rounded-xl border border-stone-800 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-amber-300 font-yose flex items-center space-x-1">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+              <span>一之輔風・日常の地雷サンプル（クリックで即入力）</span>
+            </span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <button class="sample-preset text-left p-2.5 rounded bg-[#241a14] hover:bg-[#33241b] border border-amber-900/40 text-xs text-stone-300 hover:text-amber-100 transition"
+              data-text="妻に『今日の晩飯、何がいい？』と聞かれたので良かれと思って『何でもいいよ』と笑顔で答えたら、妻の目が据わって台所の空気が氷点下になった。">
+              <div class="font-bold text-amber-200">① 『何でもいい』の地雷</div>
+              <div class="truncate text-[11px] text-stone-400">晩飯の希望を聞かれて即死…</div>
+            </button>
+            <button class="sample-preset text-left p-2.5 rounded bg-[#241a14] hover:bg-[#33241b] border border-amber-900/40 text-xs text-stone-300 hover:text-amber-100 transition"
+              data-text="ダイエットを決意して夕飯を抜いたのに、深夜2時に狂ったように台所を徘徊し、カップ焼きそばのソースを嗅ぎながら冷やご飯にマヨネーズをかけて貪り食ってしまった。">
+              <div class="font-bold text-amber-200">② 深夜2時のマヨご飯狂気</div>
+              <div class="truncate text-[11px] text-stone-400">ダイエットの誓いが3時間で崩壊…</div>
+            </button>
+            <button class="sample-preset text-left p-2.5 rounded bg-[#241a14] hover:bg-[#33241b] border border-amber-900/40 text-xs text-stone-300 hover:text-amber-100 transition"
+              data-text="全自動お掃除ロボットを新調したら、自分の履いていたスリッパを片方だけ吸い込んでクローゼットの奥深くに逃走し、そのまま充電切れで動かなくなった。">
+              <div class="font-bold text-amber-200">③ 暴走ルンバと片足スリッパ</div>
+              <div class="truncate text-[11px] text-stone-400">最新家電に舐められた男の末路…</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- 日記入力エリア -->
+        <div class="space-y-4 bg-[#1b1511] p-5 md:p-6 rounded-xl border border-stone-800 shadow-xl">
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label for="diaryInput" class="block text-sm font-bold text-amber-200 font-yose">
+                「今日は何がありましたか？」への返答・愚痴メモ
+              </label>
+              <!-- 音声入力ボタン -->
+              <button id="voiceInputBtn" class="text-xs px-2.5 py-1 rounded bg-stone-800 hover:bg-stone-700 text-stone-300 hover:text-amber-300 border border-stone-700 flex items-center space-x-1 transition">
+                <i id="voiceInputIcon" data-lucide="mic" class="w-3.5 h-3.5 text-amber-400"></i>
+                <span id="voiceInputText">声で答える</span>
+              </button>
+            </div>
+            <textarea id="diaryInput" rows="5" placeholder="例：「今日、コンビニでおにぎりを温めてもらったらアツアツすぎて持てず、思わずレジ袋ごと落としそうになって店員さんと二人でジャグリングみたいになった」など..."
+              class="w-full bg-[#120f0d] border border-stone-700 rounded-lg p-3 text-stone-200 text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 font-mincho leading-relaxed resize-y"></textarea>
+          </div>
+
+          <!-- オプション設定 -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            <div>
+              <label for="performerNameInput" class="block text-xs font-semibold text-stone-300 mb-1">
+                高座名（噺家の亭号・お名前）
+              </label>
+              <input type="text" id="performerNameInput" value="春風亭 壱之介"
+                class="w-full bg-[#120f0d] border border-stone-700 rounded-lg px-3 py-2 text-stone-200 text-sm focus:outline-none focus:border-amber-500">
+            </div>
+
+            <div>
+              <label for="rakugoStyleSelect" class="block text-xs font-semibold text-stone-300 mb-1">
+                口演スタイル
+              </label>
+              <select id="rakugoStyleSelect"
+                class="w-full bg-[#120f0d] border border-stone-700 rounded-lg px-3 py-2 text-stone-200 text-sm focus:outline-none focus:border-amber-500">
+                <option value="ichinosuke_speed">春風亭一之輔調（1分爆笑・ドライな猛毒ツッコミ）</option>
+                <option value="edo_classic">江戸前古典風（長屋の八っつぁん・ご隠居調）</option>
+                <option value="modern_humor">現代寄席口演風（ハイテンポな新作落語）</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 生成ボタン -->
+          <div class="pt-4 flex flex-col sm:flex-row items-center gap-3">
+            <button id="generateBtn"
+              class="w-full sm:flex-1 py-3.5 px-6 rounded-xl bg-gradient-to-r from-red-800 via-amber-700 to-amber-600 hover:from-red-700 hover:to-amber-500 text-amber-50 font-yose text-lg font-bold shadow-lg transition transform hover:-translate-y-0.5 flex items-center justify-center space-x-2">
+              <i data-lucide="wand-2" class="w-5 h-5"></i>
+              <span>落語に仕立てて高座を開く</span>
+            </button>
+            <button id="clearDiaryBtn" class="w-full sm:w-auto py-3 px-4 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-400 text-xs transition">
+              白紙に戻す
+            </button>
+          </div>
+        </div>
+
+        <!-- 過去の演目（履歴・台本閲覧） -->
+        <div id="scriptArchiveSection" class="bg-[#1b1511] p-5 rounded-xl border border-stone-800 space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-bold font-yose text-amber-200 flex items-center space-x-1.5">
+              <i data-lucide="scroll" class="w-4 h-4 text-amber-400"></i>
+              <span>仕上がった落語の全台本</span>
+            </h3>
+            <button id="copyScriptBtn" class="text-xs px-2.5 py-1 rounded bg-stone-800 hover:bg-stone-700 text-stone-300 flex items-center space-x-1">
+              <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+              <span>台本をコピー</span>
+            </button>
+          </div>
+          <div id="scriptFullView" class="p-3 bg-[#120f0d] rounded-lg border border-stone-800/80 text-xs text-stone-300 font-mincho leading-relaxed max-h-60 overflow-y-auto whitespace-pre-wrap">
+（まだ落語が生成されていません。「落語に仕立てて高座を開く」を押すと、ここに完全な口演台本が表示されます。）
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- フッター -->
+  <footer class="bg-[#100d0b] border-t border-[#2d2017] py-2 px-4 text-center text-xs text-[#7d6f60]">
+    <p>鈴本演芸場 提携風演出バーチャル寄席 ── 5分でクスリと笑える、毎日のための古典落語</p>
+  </footer>
+
+  <!-- 「今日は何がありましたか？」対話モーダル（高座から直接答えられる） -->
+  <div id="askTodayModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-[#1a1410] border-2 border-amber-600/70 w-full max-w-lg rounded-2xl p-6 shadow-2xl space-y-4 text-stone-200">
+      <div class="flex items-center justify-between border-b border-stone-800 pb-3">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-9 h-9 rounded-full bg-amber-800/50 border border-amber-500 flex items-center justify-center text-amber-200 font-yose text-lg">
+            噺
+          </div>
+          <div>
+            <h3 class="text-lg font-bold font-yose text-amber-200 leading-tight">「客席の旦那、今日は何がありましたか？」</h3>
+            <p class="text-xs text-stone-400">日常の一コマを話すと、即座に落語にして一席演じます</p>
+          </div>
+        </div>
+        <button id="closeAskTodayModalBtn" class="text-stone-400 hover:text-stone-200 p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- 入力エリア -->
+      <div class="space-y-3">
+        <div class="relative">
+          <textarea id="modalDiaryInput" rows="4" placeholder="「今日、会社の同僚に頼まれて買ってきた弁当が自分のと全く同じで、どっちを食べたか分からなくなった」など..."
+            class="w-full bg-[#100d0a] border border-amber-900/60 rounded-xl p-3 text-stone-100 text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 font-mincho leading-relaxed resize-none"></textarea>
+          
+          <button id="modalVoiceBtn" title="音声で話す" class="absolute bottom-3 right-3 px-2.5 py-1 rounded-lg bg-stone-800/90 border border-stone-600 text-xs text-amber-300 hover:bg-stone-700 flex items-center space-x-1 shadow">
+            <i data-lucide="mic" class="w-3.5 h-3.5"></i>
+            <span id="modalVoiceText">音声入力</span>
+          </button>
+        </div>
+
+        <!-- すぐに選べるクイックな出来事サンプル -->
+        <div class="space-y-1.5">
+          <span class="text-[11px] text-amber-400/90 font-yose">手軽に選べる「今日の出来事」：</span>
+          <div class="flex flex-wrap gap-1.5">
+            <button class="quick-topic-btn text-xs px-2.5 py-1 rounded bg-[#271d17] hover:bg-[#382a20] border border-amber-900/50 text-stone-300 hover:text-amber-200 transition"
+              data-text="今日、靴下を左右違う柄で履いて出勤してしまい、取引先の座敷で靴を脱ぐ羽目になって冷や汗をかいた。">
+              🧦 靴下左右ちぐはぐ事件
+            </button>
+            <button class="quick-topic-btn text-xs px-2.5 py-1 rounded bg-[#271d17] hover:bg-[#382a20] border border-amber-900/50 text-stone-300 hover:text-amber-200 transition"
+              data-text="今日、奮発して高級な和牛を買ってきたら、帰りの自転車の段差で袋が破れて肉が転がりそうになり曲芸のような格好で抱きとめた。">
+              🥩 高級和牛の危機一髪
+            </button>
+            <button class="quick-topic-btn text-xs px-2.5 py-1 rounded bg-[#271d17] hover:bg-[#382a20] border border-amber-900/50 text-stone-300 hover:text-amber-200 transition"
+              data-text="朝の急ぎの電車で、目の前に座っている人が自分のスマートフォンの画面を凝視していて気まずくてずっと遠くの広告を見つめていた。">
+              🚃 視線の気まずい朝電車
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 送信・演芸開始ボタン -->
+      <div class="pt-3 border-t border-stone-800 flex items-center justify-between">
+        <span class="text-xs text-stone-400">※5分完結、クスグリ3箇所の古典落語に仕立てます</span>
+        <button id="modalSubmitBtn" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-red-800 to-amber-600 hover:from-red-700 hover:to-amber-500 text-amber-50 font-yose text-sm font-bold shadow-lg flex items-center space-x-1.5 transition transform active:scale-95">
+          <i data-lucide="sparkles" class="w-4 h-4 text-yellow-300"></i>
+          <span>これで落語をつくる！</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 設定モーダル（APIキー入力や効果音微調整） -->
+  <div id="configModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-[#1a1410] border border-stone-700 w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-stone-800 pb-3">
+        <h3 class="text-lg font-bold font-yose text-amber-200 flex items-center space-x-2">
+          <i data-lucide="sliders" class="w-5 h-5 text-amber-400"></i>
+          <span>寄席・音響設定</span>
+        </h3>
+        <button id="closeConfigBtn" class="text-stone-400 hover:text-stone-200">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-sm text-stone-300">
+        <div>
+          <label class="block text-xs text-stone-400 mb-1">Gemini API Key（通常は空欄で自動適用されます）</label>
+          <input type="password" id="customApiKeyInput" placeholder="AIZA..."
+            class="w-full bg-[#100d0a] border border-stone-700 rounded px-3 py-2 text-xs text-stone-200 focus:outline-none focus:border-amber-500">
+          <p class="text-[11px] text-stone-500 mt-1">※空欄のままで動作します。外部環境で個別にキーを使いたい場合のみ入力してください。</p>
+        </div>
+
+        <div class="pt-2 border-t border-stone-800">
+          <label class="flex items-center justify-between cursor-pointer">
+            <span class="text-xs text-stone-300">出囃子（太鼓・三味線シンセ）</span>
+            <input type="checkbox" id="debayashiCheck" checked class="rounded accent-amber-600">
+          </label>
+        </div>
+
+        <div>
+          <label class="flex items-center justify-between cursor-pointer">
+            <span class="text-xs text-stone-300">観客の笑い声・拍手・掛け声</span>
+            <input type="checkbox" id="audienceSfxCheck" checked class="rounded accent-amber-600">
+          </label>
+        </div>
+
+        <div>
+          <label class="flex items-center justify-between cursor-pointer">
+            <span class="text-xs text-stone-300">拍子木（柝の音）</span>
+            <input type="checkbox" id="hyoshigiCheck" checked class="rounded accent-amber-600">
+          </label>
+        </div>
+      </div>
+
+      <div class="pt-2 flex justify-end">
+        <button id="saveConfigBtn" class="px-4 py-2 rounded-lg bg-amber-700 hover:bg-amber-600 text-amber-100 font-yose text-sm">
+          保存する
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- トーストメッセージ通知 -->
+  <div id="toastMessage" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-lg bg-stone-900/95 border border-amber-600/80 text-amber-100 text-sm shadow-2xl transition-all duration-300 opacity-0 pointer-events-none flex items-center space-x-2">
+    <i data-lucide="info" class="w-4 h-4 text-amber-400"></i>
+    <span id="toastText">案内通知</span>
+  </div>
+
+  <!-- アプリケーション JavaScript -->
+  <script>
+    /* ========================================================
+       1. 音響効果エンジン (Web Audio API)
+       拍子木、太鼓（ドンドン）、三味線風トーン、観客の拍手・笑い声
+       外部URL音源を使わず、ブラウザ標準で確実に鳴るシンセサイザー
+       ======================================================== */
+    class YoseAudioEngine {
+      constructor() {
+        this.ctx = null;
+        this.enabled = true;
+        this.debayashiActive = false;
+        this.audienceSfx = true;
+        this.hyoshigiEnabled = true;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContextClass();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      // 拍子木（柝の音）：高音で澄んだ硬い木のぶつかる音（カンッ！）
+      playHyoshigi(pitch = 2200, count = 1, interval = 220) {
+        if (!this.enabled || !this.hyoshigiEnabled) return;
+        this.init();
+
+        for (let i = 0; i < count; i++) {
+          setTimeout(() => {
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(pitch, now);
+            osc.frequency.exponentialRampToValueAtTime(pitch * 0.7, now + 0.08);
+
+            gain.gain.setValueAtTime(0.7, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+
+            osc.start(now);
+            osc.stop(now + 0.13);
+          }, i * interval);
+        }
+      }
+
+      // 開演前の柝（カカカカンッ！）
+      playOpeningClappers() {
+        this.playHyoshigi(2100, 1, 0);
+        setTimeout(() => this.playHyoshigi(2200, 1, 0), 300);
+        setTimeout(() => this.playHyoshigi(2300, 3, 100), 700);
+      }
+
+      // 寄席太鼓（ドン、カラカッカ）
+      playTaiko(freq = 90, duration = 0.4) {
+        if (!this.enabled) return;
+        this.init();
+        const now = this.ctx.currentTime;
+
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq * 1.5, now);
+        osc.frequency.exponentialRampToValueAtTime(freq * 0.4, now + duration);
+
+        gain.gain.setValueAtTime(0.8, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc.start(now);
+        osc.stop(now + duration);
+      }
+
+      // 出囃子の小フレーズ演奏（野崎風の和音階出囃子）
+      playDebayashi() {
+        if (!this.enabled) return;
+        this.init();
+
+        // 日本の陰音階・陽音階ノート (D, Eb, G, A, Bb, D)
+        const notes = [293.66, 311.13, 392.00, 440.00, 466.16, 587.33];
+        const pattern = [0, 2, 3, 5, 3, 2, 0, 3, 2, 0];
+
+        pattern.forEach((noteIdx, idx) => {
+          setTimeout(() => {
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+
+            // 三味線の撥（ばち）のパツンとした音
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(notes[noteIdx], now);
+
+            gain.gain.setValueAtTime(0.25, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+
+            osc.start(now);
+            osc.stop(now + 0.23);
+
+            // 太鼓の合いの手
+            if (idx % 2 === 0) {
+              this.playTaiko(100, 0.25);
+            }
+          }, idx * 160);
+        });
+      }
+
+      // 観客の笑いと拍手（ピンクノイズと小粒バーストで再現）
+      playApplauseAndLaugh() {
+        if (!this.enabled || !this.audienceSfx) return;
+        this.init();
+
+        const bufferSize = this.ctx.sampleRate * 1.5;
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+
+        // 拍手の重なりノイズ生成
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (this.ctx.sampleRate * 0.8));
+        }
+
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
+
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.value = 1100;
+        filter.Q.value = 1.2;
+
+        const gain = this.ctx.createGain();
+        const now = this.ctx.currentTime;
+        gain.gain.setValueAtTime(0.01, now);
+        gain.gain.linearRampToValueAtTime(0.35, now + 0.2);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 1.4);
+
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        noise.start(now);
+      }
+    }
+
+    const audio = new YoseAudioEngine();
+
+    /* ========================================================
+       2. サンプル落語データ（春風亭一之輔テイストの1分爆笑落語）
+       スピード感抜群、クスグリ3箇所、会心のオチ
+       ======================================================== */
+    const DEFAULT_RAKUGO_PERFORMANCE = {
+      title: "なんでもいい（一分落語）",
+      performer: "春風亭 壱之介",
+      summary: "晩飯の『何でもいい』という地雷を踏み抜いた男の、1分で駆け抜ける受難劇。",
+      kusuriCount: 3,
+      lines: [
+        {
+          speaker: "壱之介",
+          direction: "center",
+          emotion: "normal",
+          action: "bow",
+          text: "えー、どうもね。世の中めんどくさいですね。特に夫婦の会話なんざ、地雷を踏むために歩いてるようなもんで。",
+          isKusuri: false
+        },
+        {
+          speaker: "壱之介",
+          direction: "center",
+          emotion: "smile",
+          action: "sensu",
+          text: "夕方にカミさんから電話が来て『今日の晩飯、何がいい？』と聞かれた時の、あの恐怖。",
+          isKusuri: false
+        },
+        {
+          speaker: "亭主",
+          direction: "right",
+          emotion: "smile",
+          action: "speak",
+          text: "「あ、晩飯？俺は何でもいいよ！お前の好きなもん作ってくれれば何でも喜んで食うから！」",
+          isKusuri: false
+        },
+        {
+          speaker: "カミさん",
+          direction: "left",
+          emotion: "surprise",
+          action: "speak",
+          text: "「……出たよ『何でもいい』。世界で一番めんどくさい呪文。じゃあ何かい？サボテンのすり流しでも食うかい？」",
+          isKusuri: true,
+          kusuriNote: "【笑い所①】何でもいいに激怒してサボテンのすり流しを提案する妻"
+        },
+        {
+          speaker: "亭主",
+          direction: "right",
+          emotion: "surprise",
+          action: "speak",
+          text: "「サボテンは食えねえだろ！刺さるだろ喉に！じゃあ普通に唐揚げとかでいいよ！」",
+          isKusuri: false
+        },
+        {
+          speaker: "カミさん",
+          direction: "left",
+          emotion: "normal",
+          action: "sensu",
+          text: "「『でいい』って何様だよ！油の温度管理と後片付けの手間を知らないくせに！鶏に土下座して謝りな！」",
+          isKusuri: true,
+          kusuriNote: "【笑い所②】『唐揚げでいい』の『で』にキレて鶏への土下座を要求"
+        },
+        {
+          speaker: "壱之介",
+          direction: "center",
+          emotion: "smile",
+          action: "sensu",
+          text: "ほうほうの体で家へ帰ったら、食卓の上にポツンと、お皿が一枚だけ置いてありましてね。",
+          isKusuri: false
+        },
+        {
+          speaker: "亭主",
+          direction: "right",
+          emotion: "surprise",
+          action: "speak",
+          text: "「おいカミさん、皿の上に料理が乗ってねえぞ……これ、千円札が一枚置いてあるだけじゃねえか！」",
+          isKusuri: true,
+          kusuriNote: "【笑い所③】皿の上に乗っていたまさかのメインディッシュ"
+        },
+        {
+          speaker: "カミさん",
+          direction: "left",
+          emotion: "smile",
+          action: "speak",
+          text: "「それが今夜のメインディッシュだよ。『好きなサボテン買ってこい』ってね！」",
+          isKusuri: false
+        },
+        {
+          speaker: "亭主",
+          direction: "right",
+          emotion: "smile",
+          action: "bow",
+          text: "「へっ、おかげで財布も胃袋も、とげとげしい夜になりました。」",
+          isKusuri: false
+        },
+        {
+          speaker: "壱之介",
+          direction: "center",
+          emotion: "smile",
+          action: "bow",
+          text: "おあとがよろしいようで。春風亭壱之介でございました！",
+          isKusuri: false
+        }
+      ]
+    };
+
+    /* ========================================================
+       3. アプリケーション状態管理
+       ======================================================== */
+    const state = {
+      currentRakugo: DEFAULT_RAKUGO_PERFORMANCE,
+      currentIndex: 0,
+      isPlaying: false,
+      playTimer: null,
+      speed: 1.0,
+      ttsEnabled: ('speechSynthesis' in window),
+      customApiKey: "",
+      kusuriTriggeredCount: 0,
+      isSpeaking: false
+    };
+
+    /* ========================================================
+       4. UI DOM要素の取得
+       ======================================================== */
+    const tabKozaBtn = document.getElementById('tabKozaBtn');
+    const tabInputBtn = document.getElementById('tabInputBtn');
+    const kozaView = document.getElementById('kozaView');
+    const inputView = document.getElementById('inputView');
+
+    const mekuriTitle = document.getElementById('mekuriTitle');
+    const mekuriName = document.getElementById('mekuriName');
+    const mekuriBox = document.getElementById('mekuriBox');
+
+    const rakugokaWrapper = document.getElementById('rakugokaWrapper');
+    const headGroup = document.getElementById('headGroup');
+    const sensuItem = document.getElementById('sensuItem');
+    const mouthOpen = document.getElementById('mouthOpen');
+    const mouthShape = document.getElementById('mouthShape');
+    const eyesNormal = document.getElementById('eyesNormal');
+    const eyesSmile = document.getElementById('eyesSmile');
+    const eyesSurprise = document.getElementById('eyesSurprise');
+
+    const speechSpeaker = document.getElementById('speechSpeaker');
+    const speechDirection = document.getElementById('speechDirection');
+    const speechText = document.getElementById('speechText');
+    const kusuriBadge = document.getElementById('kusuriBadge');
+    const kusuriCounter = document.getElementById('kusuriCounter');
+    const progressText = document.getElementById('progressText');
+    const progressBar = document.getElementById('progressBar');
+
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const playPauseIcon = document.getElementById('playPauseIcon');
+    const playPauseText = document.getElementById('playPauseText');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const speedBtn = document.getElementById('speedBtn');
+    const ttsToggleBtn = document.getElementById('ttsToggleBtn');
+    const ttsIcon = document.getElementById('ttsIcon');
+
+    const diaryInput = document.getElementById('diaryInput');
+    const performerNameInput = document.getElementById('performerNameInput');
+    const rakugoStyleSelect = document.getElementById('rakugoStyleSelect');
+    const generateBtn = document.getElementById('generateBtn');
+    const clearDiaryBtn = document.getElementById('clearDiaryBtn');
+    const scriptFullView = document.getElementById('scriptFullView');
+    const copyScriptBtn = document.getElementById('copyScriptBtn');
+
+    const audioToggleBtn = document.getElementById('audioToggleBtn');
+    const audioStatusText = document.getElementById('audioStatusText');
+    const configBtn = document.getElementById('configBtn');
+    const configModal = document.getElementById('configModal');
+    const closeConfigBtn = document.getElementById('closeConfigBtn');
+    const saveConfigBtn = document.getElementById('saveConfigBtn');
+    const customApiKeyInput = document.getElementById('customApiKeyInput');
+    const debayashiCheck = document.getElementById('debayashiCheck');
+    const audienceSfxCheck = document.getElementById('audienceSfxCheck');
+    const hyoshigiCheck = document.getElementById('hyoshigiCheck');
+    const laughReactionContainer = document.getElementById('laughReactionContainer');
+
+    // 「今日は何がありましたか？」関連の要素
+    const askTodayPromptBtn = document.getElementById('askTodayPromptBtn');
+    const askTodaySpeechBubble = document.getElementById('askTodaySpeechBubble');
+    const askTodayModal = document.getElementById('askTodayModal');
+    const closeAskTodayModalBtn = document.getElementById('closeAskTodayModalBtn');
+    const modalDiaryInput = document.getElementById('modalDiaryInput');
+    const modalSubmitBtn = document.getElementById('modalSubmitBtn');
+    const modalVoiceBtn = document.getElementById('modalVoiceBtn');
+    const modalVoiceText = document.getElementById('modalVoiceText');
+    const voiceInputBtn = document.getElementById('voiceInputBtn');
+    const voiceInputText = document.getElementById('voiceInputText');
+
+    /* ========================================================
+       5. 画面切り替えとタブ
+       ======================================================== */
+    function switchTab(target) {
+      if (target === 'koza') {
+        kozaView.classList.remove('hidden');
+        inputView.classList.add('hidden');
+        tabKozaBtn.classList.add('bg-amber-900/40', 'border-amber-500', 'text-amber-200');
+        tabKozaBtn.classList.remove('border-stone-800', 'bg-stone-900/50', 'text-stone-400');
+        tabInputBtn.classList.add('border-stone-800', 'bg-stone-900/50', 'text-stone-400');
+        tabInputBtn.classList.remove('bg-amber-900/40', 'border-amber-500', 'text-amber-200');
+      } else {
+        kozaView.classList.add('hidden');
+        inputView.classList.remove('hidden');
+        tabInputBtn.classList.add('bg-amber-900/40', 'border-amber-500', 'text-amber-200');
+        tabInputBtn.classList.remove('border-stone-800', 'bg-stone-900/50', 'text-stone-400');
+        tabKozaBtn.classList.add('border-stone-800', 'bg-stone-900/50', 'text-stone-400');
+        tabKozaBtn.classList.remove('bg-amber-900/40', 'border-amber-500', 'text-amber-200');
+      }
+    }
+
+    tabKozaBtn.addEventListener('click', () => switchTab('koza'));
+    tabInputBtn.addEventListener('click', () => switchTab('input'));
+
+    /* ========================================================
+       6. 落語家のアニメーション＆セリフ表示制御
+       ・上下（かみしも）を切る：首と顔の向き（左・右・正面）
+       ・扇子の所作
+       ・表情（通常・笑顔・驚き）
+       ・口パク
+       ======================================================== */
+    function setRakugokaPose(direction = "center", emotion = "normal", action = "speak") {
+      // 1. 上下（かみしも）の向き
+      if (direction === "right") {
+        // 八っつぁん等：上手（向かって右）を向く
+        headGroup.style.transform = "rotate(7deg) translateX(4px)";
+      } else if (direction === "left") {
+        // ご隠居・カミさん等：下手（向かって左）を向く
+        headGroup.style.transform = "rotate(-7deg) translateX(-4px)";
+      } else {
+        // 噺家（正面）
+        headGroup.style.transform = "rotate(0deg) translateX(0px)";
+      }
+
+      // 2. 表情の切り替え
+      eyesNormal.classList.add('hidden');
+      eyesSmile.classList.add('hidden');
+      eyesSurprise.classList.add('hidden');
+
+      if (emotion === "smile") {
+        eyesSmile.classList.remove('hidden');
+      } else if (emotion === "surprise") {
+        eyesSurprise.classList.remove('hidden');
+      } else {
+        eyesNormal.classList.remove('hidden');
+      }
+
+      // 3. 所作（扇子の構え）
+      if (action === "sensu") {
+        sensuItem.style.transform = "rotate(-35deg) translate(-10px, -15px)";
+      } else if (action === "bow") {
+        sensuItem.style.transform = "rotate(0deg) translate(0, 0)";
+        headGroup.style.transform += " translateY(12px)";
+      } else {
+        sensuItem.style.transform = "rotate(-10deg) translate(0, 0)";
+      }
+
+      // 4. 口パクのアニメーション
+      animateMouth();
+    }
+
+    let mouthInterval = null;
+    function animateMouth(duration = 1800) {
+      if (mouthInterval) clearInterval(mouthInterval);
+      let count = 0;
+      mouthInterval = setInterval(() => {
+        count++;
+        if (count % 2 === 0) {
+          mouthOpen.classList.remove('hidden');
+          mouthShape.setAttribute('d', 'M 143 106 Q 150 114 157 106');
+        } else {
+          mouthOpen.classList.add('hidden');
+          mouthShape.setAttribute('d', 'M 143 108 Q 150 112 157 108');
+        }
+        if (count > duration / 120) {
+          clearInterval(mouthInterval);
+          mouthOpen.classList.add('hidden');
+          mouthShape.setAttribute('d', 'M 143 108 Q 150 112 157 108');
+        }
+      }, 120);
+    }
+
+    /* 笑い・歓声・掛け声の客席リアクション吹き出し */
+    function showLaughEffect(text = "ハハハ！") {
+      const bubble = document.createElement('div');
+      const shouts = ["ドッ（大笑い）", "ハハハッ！", "待ってました！", "日本一！", "クスクス...", "上手いねぇ！"];
+      const randomText = text || shouts[Math.floor(Math.random() * shouts.length)];
+      
+      const randomX = Math.floor(Math.random() * 60) - 30; // -30% to +30%
+      bubble.className = "absolute laugh-bubble px-3 py-1 rounded-full bg-red-900/90 text-yellow-200 border border-yellow-500 text-xs md:text-sm font-yose shadow-lg pointer-events-none";
+      bubble.style.left = `calc(50% + ${randomX}%)`;
+      bubble.innerText = randomText;
+
+      laughReactionContainer.appendChild(bubble);
+      setTimeout(() => {
+        bubble.remove();
+      }, 2300);
+
+      audio.playApplauseAndLaugh();
+    }
+
+    /* ========================================================
+       7. セリフ進行・レンダリング
+       ======================================================== */
+    function renderCurrentLine() {
+      const lines = state.currentRakugo.lines;
+      if (!lines || lines.length === 0) return;
+
+      const line = lines[state.currentIndex];
+      if (!line) return;
+
+      // 演者・演目めくり更新
+      mekuriTitle.innerHTML = state.currentRakugo.title.replace(/(.{4})/g, '$1<br>');
+      mekuriName.innerHTML = state.currentRakugo.performer.replace(/(.{3})/g, '$1<br>');
+
+      // テキスト表示
+      speechSpeaker.innerText = line.speaker;
+      
+      // 話者向きの日本語名
+      const dirMap = { center: "【正面・マクラ】", right: "【上手（かみ）・町人】", left: "【下手（しも）・隠居】" };
+      speechDirection.innerText = dirMap[line.direction] || "【正面】";
+      speechText.innerText = line.text;
+
+      // クスグリ（笑い所）判定
+      if (line.isKusuri) {
+        kusuriBadge.classList.remove('hidden');
+        showLaughEffect("ドッ（笑い！）");
+        state.kusuriTriggeredCount = Math.min(3, state.kusuriTriggeredCount + 1);
+        kusuriCounter.innerText = `${state.kusuriTriggeredCount} / 3 席`;
+      } else {
+        kusuriBadge.classList.add('hidden');
+      }
+
+      // 落語家ポーズ
+      setRakugokaPose(line.direction, line.emotion, line.action);
+
+      // プログレスバー
+      progressText.innerText = `${state.currentIndex + 1} / ${lines.length} 幕`;
+      const pct = Math.round(((state.currentIndex + 1) / lines.length) * 100);
+      progressBar.style.width = `${pct}%`;
+
+      // 音声読み上げ
+      if (state.ttsEnabled && window.speechSynthesis) {
+        speakText(line.text, line.direction);
+      }
+    }
+
+    /* Web Speech APIによる日本語読み上げ */
+    function speakText(text, direction) {
+      try {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'ja-JP';
+        utter.rate = state.speed * 1.05;
+        
+        // 役柄によってピッチを微調整（上手：若者/庶民、下手：隠居/女性、正面：噺家）
+        if (direction === 'left') {
+          utter.pitch = 1.2; // 少し高め（カミさんやご隠居）
+        } else if (direction === 'right') {
+          utter.pitch = 0.95; // 少し低め（八っつぁん）
+        } else {
+          utter.pitch = 1.05;
+        }
+
+        utter.onstart = () => { state.isSpeaking = true; };
+        utter.onend = () => {
+          state.isSpeaking = false;
+          // 自動再生中の場合、話し終わったら少し間を置いて次へ
+          if (state.isPlaying) {
+            scheduleNextAutoPlay(800 / state.speed);
+          }
+        };
+        utter.onerror = () => {
+          state.isSpeaking = false;
+          if (state.isPlaying) scheduleNextAutoPlay(2200 / state.speed);
+        };
+
+        window.speechSynthesis.speak(utter);
+      } catch (e) {
+        console.warn("TTS Error:", e);
+      }
+    }
+
+    function scheduleNextAutoPlay(delayMs = 2500) {
+      if (state.playTimer) clearTimeout(state.playTimer);
+      state.playTimer = setTimeout(() => {
+        if (!state.isPlaying) return;
+        if (state.currentIndex < state.currentRakugo.lines.length - 1) {
+          state.currentIndex++;
+          renderCurrentLine();
+        } else {
+          // 終演
+          stopPerformance();
+          audio.playOpeningClappers();
+          showToast("これにて一席、終演でございます！");
+        }
+      }, delayMs);
+    }
+
+    function playPerformance() {
+      state.isPlaying = true;
+      playPauseText.innerText = "中入り";
+      playPauseIcon.setAttribute('data-lucide', 'pause');
+      lucide.createIcons();
+
+      // 開始時に出囃子
+      if (state.currentIndex === 0) {
+        audio.playDebayashi();
+        audio.playOpeningClappers();
+        // めくりペラッ
+        mekuriBox.classList.add('mekuri-flip');
+        setTimeout(() => mekuriBox.classList.remove('mekuri-flip'), 800);
+      }
+
+      renderCurrentLine();
+
+      // 音声読み上げが無効な場合はタイマーで自動進行
+      if (!state.ttsEnabled) {
+        scheduleNextAutoPlay(3500 / state.speed);
+      }
+    }
+
+    function stopPerformance() {
+      state.isPlaying = false;
+      if (state.playTimer) clearTimeout(state.playTimer);
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
+      playPauseText.innerText = "開演";
+      playPauseIcon.setAttribute('data-lucide', 'play');
+      lucide.createIcons();
+    }
+
+    /* 再生・一時停止・セリフ送りボタンの操作リスナー */
+    playPauseBtn.addEventListener('click', () => {
+      if (state.isPlaying) {
+        stopPerformance();
+      } else {
+        playPerformance();
+      }
+    });
+
+    prevBtn.addEventListener('click', () => {
+      if (state.currentIndex > 0) {
+        state.currentIndex--;
+        renderCurrentLine();
+      }
+    });
+
+    nextBtn.addEventListener('click', () => {
+      if (state.currentIndex < state.currentRakugo.lines.length - 1) {
+        state.currentIndex++;
+        renderCurrentLine();
+      } else {
+        stopPerformance();
+        audio.playOpeningClappers();
+        showToast("これにて一席、終演でございます！");
+      }
+    });
+
+    const speeds = [1.0, 1.25, 1.5, 0.8];
+    speedBtn.addEventListener('click', () => {
+      const currIdx = speeds.indexOf(state.speed);
+      state.speed = speeds[(currIdx + 1) % speeds.length];
+      speedBtn.innerText = `${state.speed}x`;
+      showToast(`話速を ${state.speed}倍 に変更しました`);
+    });
+
+    ttsToggleBtn.addEventListener('click', () => {
+      state.ttsEnabled = !state.ttsEnabled;
+      if (state.ttsEnabled) {
+        ttsIcon.classList.remove('text-stone-600', 'line-through');
+        ttsIcon.classList.add('text-stone-300');
+        showToast("音声読み上げ: 入");
+      } else {
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+        ttsIcon.classList.add('text-stone-600', 'line-through');
+        ttsIcon.classList.remove('text-stone-300');
+        showToast("音声読み上げ: 切");
+      }
+    });
+
+    /* ========================================================
+       8. 落語生成エンジン (Gemini API & 内蔵古典落語仕立て機)
+       ======================================================== */
+    async function generateRakugoFromDiary() {
+      const diaryText = diaryInput.value.trim();
+      if (!diaryText) {
+        showToast("まずは「今日は何がありましたか？」への返答や日記をご入力ください。");
+        switchTab('input');
+        diaryInput.focus();
+        return;
+      }
+
+      const performerName = performerNameInput.value.trim() || "鈴本亭 日々丸";
+      const style = rakugoStyleSelect.value || "edo_classic";
+
+      // ボタンのローディング表示
+      const origBtnHtml = generateBtn.innerHTML;
+      generateBtn.disabled = true;
+      generateBtn.innerHTML = `
+        <span class="inline-block animate-spin mr-2">⚙</span>
+        <span>落語に仕立てております...</span>
+      `;
+
+      try {
+        let rakugoData = null;
+        const apiKey = state.customApiKey;
+
+        if (apiKey) {
+          try {
+            rakugoData = await fetchRakugoFromGemini(diaryText, performerName, style, apiKey);
+          } catch (apiErr) {
+            console.warn("API呼び出しに失敗したため内蔵エンジンで生成します:", apiErr);
+            showToast("外部通信が不通のため、内蔵の落語仕立て機で生成いたします。");
+            rakugoData = createSmartFallbackRakugo(diaryText, performerName, style);
+          }
+        } else {
+          // 内蔵落語生成機（日記の出来事を古典落語のクスグリ3箇所とサゲに変換）
+          rakugoData = createSmartFallbackRakugo(diaryText, performerName, style);
+        }
+
+        if (rakugoData && rakugoData.lines && rakugoData.lines.length > 0) {
+          stopPerformance();
+          state.currentRakugo = rakugoData;
+          state.currentIndex = 0;
+          state.kusuriTriggeredCount = 0;
+          kusuriCounter.innerText = "0 / 3 席";
+
+          updateScriptArchiveView(rakugoData);
+          switchTab('koza');
+          renderCurrentLine();
+          showToast(`新作落語『${rakugoData.title}』が出来上がりました！`);
+          
+          // 開演と出囃子
+          setTimeout(() => {
+            playPerformance();
+          }, 600);
+        } else {
+          throw new Error("台本の生成に失敗しました");
+        }
+      } catch (err) {
+        console.error("落語生成エラー:", err);
+        showToast("落語の仕立て中に問題が発生しました。もう一度お試しください。");
+      } finally {
+        generateBtn.disabled = false;
+        generateBtn.innerHTML = origBtnHtml;
+        lucide.createIcons();
+      }
+    }
+
+    /* Gemini API連携用関数（春風亭一之輔憑依プロンプト・1分完結） */
+    async function fetchRakugoFromGemini(diaryText, performerName, style, apiKey) {
+      const prompt = `あなたは現代落語界の天才トップランナー「春風亭一之輔」です。
+当代きっての毒気、斜に構えたドライなツッコミ、狂気と愛嬌が同居するスピード感あふれる語り口で、観客の日常の出来事を「1分で駆け抜ける超爆笑ショート落語」に仕立ててください。
+
+【観客の出来事（今日のメモ）】:
+"${diaryText}"
+
+【春風亭一之輔スタイルの必須要件】:
+1. 所要時間: ちょうど1分で演じ切れるテンポ（セリフ数は全9〜11行程度でコンパクトにまとめること）。
+2. トーン＆マナー:
+   - 「えー、めんどくさいですね」「バカですねえ」「死ぬ気配のないため息をつくな」といった一之輔特有の乾いたツッコミとリズム。
+   - まどろっこしい解説を省き、最初からフルスロットルのテンポ。
+3. 笑い所（クスグリ）:
+   - わずか1分の間に【必ず最低3カ所の爆笑クスグリ】を入れること。
+4. オチ（サゲ）:
+   - 最後の一言で必ず観客を「ドッ」と腹から笑わせる、切れ味鋭い会心のオチをつけること。
+
+必ず以下のJSONフォーマットのみを返してください。Markdownのバッククォートを含めず、純粋なJSON文字列で返してください。
+{
+  "title": "演目のタイトル（一之輔落語風の切れ味ある名前）",
+  "performer": "${performerName}",
+  "summary": "1行のあらすじ",
+  "kusuriCount": 3,
+  "lines": [
+    {
+      "speaker": "${performerName}" または 登場人物名,
+      "direction": "center"（噺家）または "right"（上手・ツッコミ/ボケ）または "left"（下手・相手方）,
+      "emotion": "normal" または "smile" または "surprise",
+      "action": "speak" または "sensu"（扇子を構える）または "bow"（お辞儀）,
+      "text": "セリフ本文（テンポ良く鋭い一之輔口調）",
+      "isKusuri": true または false（3箇所以上trueにする）,
+      "kusuriNote": "笑い所の解説（isKusuriがtrueの場合）"
+    }
+  ]
+}`;
+
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.85,
+            responseMimeType: "application/json"
+          }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`API responded with ${response.status}`);
+      }
+
+      const resData = await response.json();
+      const rawText = resData.candidates?.[0]?.content?.parts?.[0]?.text;
+      const cleanJson = rawText.replace(/```json\n?|```/g, '').trim();
+      return JSON.parse(cleanJson);
+    }
+
+    /* ========================================================
+       8-B. 「今日は何がありましたか？」対話モーダル & 音声入力
+       ======================================================== */
+    function openAskTodayModal() {
+      modalDiaryInput.value = diaryInput.value || "";
+      askTodayModal.classList.remove('hidden');
+      audio.playHyoshigi(2100, 1);
+      setTimeout(() => modalDiaryInput.focus(), 100);
+    }
+
+    function closeAskTodayModal() {
+      askTodayModal.classList.add('hidden');
+    }
+
+    if (askTodayPromptBtn) askTodayPromptBtn.addEventListener('click', openAskTodayModal);
+    if (askTodaySpeechBubble) askTodaySpeechBubble.addEventListener('click', openAskTodayModal);
+    if (closeAskTodayModalBtn) closeAskTodayModalBtn.addEventListener('click', closeAskTodayModal);
+
+    // クイックトピック選択
+    document.querySelectorAll('.quick-topic-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        modalDiaryInput.value = btn.dataset.text;
+        showToast("出来事を選びました。「これで落語をつくる！」を押してください。");
+      });
+    });
+
+    // モーダルからの落語生成
+    if (modalSubmitBtn) {
+      modalSubmitBtn.addEventListener('click', () => {
+        const text = modalDiaryInput.value.trim();
+        if (!text) {
+          showToast("今日は何があったか、一言お聞かせください。");
+          return;
+        }
+        diaryInput.value = text;
+        closeAskTodayModal();
+        generateRakugoFromDiary();
+      });
+    }
+
+    // 音声認識（Web Speech Recognition）対応
+    function setupVoiceRecognition(buttonEl, textEl, targetInput) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        buttonEl.addEventListener('click', () => {
+          showToast("お使いのブラウザは音声入力に対応しておりません。文字でご入力ください。");
+        });
+        return;
+      }
+
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'ja-JP';
+      recognition.interimResults = false;
+      recognition.continuous = false;
+
+      let isListening = false;
+
+      buttonEl.addEventListener('click', () => {
+        if (isListening) {
+          recognition.stop();
+          return;
+        }
+        try {
+          recognition.start();
+          isListening = true;
+          textEl.innerText = "拝聴中...";
+          buttonEl.classList.add('bg-red-900', 'text-yellow-200', 'animate-pulse');
+          showToast("お話しください。噺家が耳を傾けております...");
+        } catch (e) {
+          console.warn(e);
+        }
+      });
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        if (targetInput.value) {
+          targetInput.value += " " + transcript;
+        } else {
+          targetInput.value = transcript;
+        }
+        showToast("「" + transcript + "」と承りました！");
+      };
+
+      recognition.onerror = () => {
+        isListening = false;
+        textEl.innerText = "声で答える";
+        buttonEl.classList.remove('bg-red-900', 'text-yellow-200', 'animate-pulse');
+      };
+
+      recognition.onend = () => {
+        isListening = false;
+        textEl.innerText = "声で答える";
+        buttonEl.classList.remove('bg-red-900', 'text-yellow-200', 'animate-pulse');
+      };
+    }
+
+    if (voiceInputBtn && diaryInput) {
+      setupVoiceRecognition(voiceInputBtn, voiceInputText, diaryInput);
+    }
+    if (modalVoiceBtn && modalDiaryInput) {
+      setupVoiceRecognition(modalVoiceBtn, modalVoiceText, modalDiaryInput);
+    }
+
+    /* フォールバック用：一之輔スタイルの超爆笑1分ショート落語エンジン */
+    function createSmartFallbackRakugo(diaryText, performerName) {
+      const summarySnippet = diaryText.length > 25 ? diaryText.substring(0, 23) + "…" : diaryText;
+      return {
+        title: "災難の一撃（一分落語）",
+        performer: performerName || "春風亭 壱之介",
+        summary: `『${summarySnippet}』という地獄から1分で生還する男の物語。`,
+        kusuriCount: 3,
+        lines: [
+          {
+            speaker: performerName || "壱之介",
+            direction: "center",
+            emotion: "normal",
+            action: "bow",
+            text: "えー、生きてるだけで偉いなんて嘘ですよ。人間、油断すると一秒で恥をかきますから。",
+            isKusuri: false
+          },
+          {
+            speaker: performerName || "壱之介",
+            direction: "center",
+            emotion: "smile",
+            action: "sensu",
+            text: `今日のお客さんもやってくれました。『${summarySnippet}』……いやぁ、救いようのないポンコツですねえ。`,
+            isKusuri: false
+          },
+          {
+            speaker: "男",
+            direction: "right",
+            emotion: "surprise",
+            action: "speak",
+            text: `「ちょっと聞いてくれよ！『${summarySnippet}』ってなってさ、あまりの恥ずかしさにその場で記憶喪失のフリしたんだ！」`,
+            isKusuri: true,
+            kusuriNote: "【笑い所①】ピンチを乗り切るために即興で記憶喪失を偽装する男"
+          },
+          {
+            speaker: "友だち",
+            direction: "left",
+            emotion: "smile",
+            action: "speak",
+            text: "「バカだねえ！記憶喪失のやつが『あれ、オレ誰だっけ？でもPayPayで払えますか？』って聞くわけねえだろ！」",
+            isKusuri: true,
+            kusuriNote: "【笑い所②】記憶を失ったフリしながら電子マネーで払おうとする矛盾"
+          },
+          {
+            speaker: "男",
+            direction: "right",
+            emotion: "surprise",
+            action: "sensu",
+            text: "「ポイント還元だけはどうしても諦めがつかなかったんだよ！」",
+            isKusuri: false
+          },
+          {
+            speaker: "友だち",
+            direction: "left",
+            emotion: "surprise",
+            action: "speak",
+            text: "「往生際がセコいんだよ！恥を上書きするために更なる地獄を自分で掘ってどうすんだ！」",
+            isKusuri: true,
+            kusuriNote: "【笑い所③】恥の上塗りに全力でツッコむ友だち"
+          },
+          {
+            speaker: "男",
+            direction: "right",
+            emotion: "smile",
+            action: "bow",
+            text: "「へっ、おかげで今日の日記には『大赤字（恥）』とだけ書いておきました。」",
+            isKusuri: false
+          },
+          {
+            speaker: performerName || "壱之介",
+            direction: "center",
+            emotion: "smile",
+            action: "bow",
+            text: "おあとがよろしいようで。どうもありがとございました！",
+            isKusuri: false
+          }
+        ]
+      };
+    }
+
+    // 全台本アーカイブの表示更新
+    function updateScriptArchiveView(rakugo) {
+      let full = `【演目】${rakugo.title}\n【演者】${rakugo.performer}\n【粗筋】${rakugo.summary}\n\n`;
+      rakugo.lines.forEach((l, i) => {
+        const flag = l.isKusuri ? " ★[クスグリ] " : " ";
+        full += `${i + 1}. ${l.speaker}${flag}: 「${l.text}」\n`;
+      });
+      scriptFullView.innerText = full;
+    }
+
+    /* ========================================================
+       9. 各種イベントリスナー・操作
+       ======================================================== */
+    // サンプル日記の入力
+    document.querySelectorAll('.sample-preset').forEach(btn => {
+      btn.addEventListener('click', () => {
+        diaryInput.value = btn.dataset.text;
+        showToast("サンプル日記をネタ帳に転記しました。");
+      });
+    });
+
+    // 白紙に戻す
+    clearDiaryBtn.addEventListener('click', () => {
+      diaryInput.value = "";
+      showToast("ネタ帳を白紙にしました。");
+    });
+
+    // 落語生成ボタン
+    generateBtn.addEventListener('click', generateRakugoFromDiary);
+
+    // 台本コピー
+    copyScriptBtn.addEventListener('click', () => {
+      const text = scriptFullView.innerText;
+      if (!text || text.includes('まだ落語が生成されていません')) {
+        showToast("コピーする台本がありません。");
+        return;
+      }
+      const tempArea = document.createElement('textarea');
+      tempArea.value = text;
+      document.body.appendChild(tempArea);
+      tempArea.select();
+      try {
+        document.execCommand('copy');
+        showToast("演目の台本をクリップボードに写し取りました！");
+      } catch (e) {
+        showToast("コピーに失敗しました。");
+      }
+      document.body.removeChild(tempArea);
+    });
+
+    // 音響トグル
+    audioToggleBtn.addEventListener('click', () => {
+      audio.enabled = !audio.enabled;
+      if (audio.enabled) {
+        audioStatusText.innerText = "寄席囃子: 入";
+        audioToggleBtn.classList.add('bg-[#241a14]', 'text-amber-200');
+        audioToggleBtn.classList.remove('bg-stone-800', 'text-stone-500');
+        audio.playHyoshigi(2200, 1);
+      } else {
+        audioStatusText.innerText = "寄席囃子: 切";
+        audioToggleBtn.classList.remove('bg-[#241a14]', 'text-amber-200');
+        audioToggleBtn.classList.add('bg-stone-800', 'text-stone-500');
+      }
+    });
+
+    // 設定モーダル
+    configBtn.addEventListener('click', () => {
+      configModal.classList.remove('hidden');
+    });
+    closeConfigBtn.addEventListener('click', () => {
+      configModal.classList.add('hidden');
+    });
+    saveConfigBtn.addEventListener('click', () => {
+      state.customApiKey = customApiKeyInput.value.trim();
+      audio.debayashiActive = debayashiCheck.checked;
+      audio.audienceSfx = audienceSfxCheck.checked;
+      audio.hyoshigiEnabled = hyoshigiCheck.checked;
+      configModal.classList.add('hidden');
+      showToast("寄席の設定を保存いたしました。");
+    });
+
+    // トースト通知関数
+    let toastTimer = null;
+    function showToast(msg) {
+      const toast = document.getElementById('toastMessage');
+      const textEl = document.getElementById('toastText');
+      textEl.innerText = msg;
+      toast.classList.remove('opacity-0', 'pointer-events-none');
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.add('opacity-0', 'pointer-events-none');
+      }, 3000);
+    }
+
+    /* キーボード操作（矢印キーでセリフ送り、スペースで再生/一時停止） */
+    window.addEventListener('keydown', (e) => {
+      if (document.activeElement === diaryInput || document.activeElement === performerNameInput || document.activeElement === customApiKeyInput) {
+        return;
+      }
+      if (e.code === 'Space') {
+        e.preventDefault();
+        playPauseBtn.click();
+      } else if (e.code === 'ArrowRight' || e.code === 'ArrowDown') {
+        e.preventDefault();
+        nextBtn.click();
+      } else if (e.code === 'ArrowLeft' || e.code === 'ArrowUp') {
+        e.preventDefault();
+        prevBtn.click();
+      }
+    });
+
+    /* 初期化ロード */
+    window.onload = function() {
+      lucide.createIcons();
+      updateScriptArchiveView(state.currentRakugo);
+      renderCurrentLine();
+      // 初回案内
+      setTimeout(() => {
+        showToast("ようこそ上野・鈴本演芸場へ。「開演」または「ネタ帳」からどうぞ。");
+      }, 700);
+    };
+  </script>
+</body>
+</html>
